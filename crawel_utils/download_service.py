@@ -4,9 +4,8 @@ import simplejson as json
 import time
 import random
 import requests
-from Db import mongoutil
-import agency
-
+from db_utils import mongoutil
+from crawel_utils import agency
 
 USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
