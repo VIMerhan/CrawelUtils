@@ -5,7 +5,7 @@ import time
 import random
 import requests
 from db_utils import mongoutil
-from crawel_utils import agency
+import crawel_utils.agency as agency
 
 USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
@@ -28,30 +28,22 @@ USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
 ]
 
-def request_method(url, user_agent=None, num_retries=2, proxies=None):
-    # request方法
-    ip, port = ("'http://110.73.2.182", "8123")
-    proxy_url = "{0}:{1}".format(ip, port)
-
-    print(proxy_url)
-
-    proxy_dict = {
-        "http": proxy_url
-    }
-
+def request_method(url, user_agent=random.choice(USER_AGENT_LIST), num_retries=2, proxies=None):
+    headers = {'User-agent': user_agent}
     try:
         print('Downloading', url)
-        response = requests.get(url, proxies=proxy_dict)
-        html = str(response.content, 'gbk')
+        response = requests.get(url, headers=headers, proxies=proxies)
+        html = str(response.content, 'utf-8')
 
-    except requests.HTTPError as e:
-        print('Download error', e.reason)
+    except requests.exceptions.ConnectionError as e:
+        print('Download error:', e.errno)
         html = None
         if num_retries > 0:
             if hasattr(e, 'code') and 500 <= e.code < 600:
                 return request_method(url, num_retries - 1)
 
     return html
+
 
 def urllib_method(url, user_agent, num_retries=2, proxies=None):
     # 默认从user_agent池中随机获取
@@ -119,25 +111,27 @@ def save_to_mongo():
         url = 'http://m.maoyan.com/mmdb/comments/movie/1175253.json?_v_=yes&offset=' + str(i)
         html = urllib_method(url)
         print('正在保存第%d页.' % i)
-        m = mongoutil.MongoUtil()
-        c = m.get_collection()
+        set = mongoutil.get_collection()
 
-        diction = parse_ono_page(html)
-        c.insert(diction)
-        # 反爬
+        doc = parse_ono_page(html)
+        set.insert(doc)
+        # 休眠反爬
         time.sleep(5 + float(random.randint(1, 100)) / 20)
 
 
 if __name__ == '__main__':
-
-    proxies = agency.get_random_ip(agency.get_ip_list())
-
-    print(proxies)
     url = 'http://www.baidu.com'
+    # 代理UA
+    user_agent = random.choice(USER_AGENT_LIST)
+    # 代理ip
+    proxy_dict = agency.get_random_ip()
+    print(proxy_dict)
+
+    html = request_method(url)
+    print(html)
+
 
     # request_method(url)
 
-
     # save_to_txt()
     # save_to_mongo()
-

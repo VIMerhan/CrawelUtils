@@ -20,6 +20,10 @@ def get_list_doc(set):
     return document
 
 
+def set_one_doc(set, doc):
+    set.insert(doc)
+
+
 if __name__ == '__main__':
     set = get_collection('数据分析', '爱情公寓')
 

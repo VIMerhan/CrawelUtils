@@ -8,7 +8,7 @@ import random
 
 URL = 'http://www.xicidaili.com/nn/'
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+    'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
 }
 
 
@@ -24,19 +24,21 @@ def get_ip_list(url=URL, headers=HEADERS):
     return ip_list
 
 
-def get_random_ip(ip_list):
-    # for ip in ip_list:
-    #     proxy_list.append('http://' + ip)
-    # 作用同上，一行语句完成遍历赋值
+def get_random_ip():
+    ip_list = get_ip_list()
+    # 一行语句完成遍历赋值
     proxy_list = ['http://' + ip for ip in ip_list]
     # 随机选取ip
     proxy_ip = random.choice(proxy_list)
-    proxies = {'http': proxy_ip}
-    return proxies
+    proxy_dict = {'http': proxy_ip}
+    return proxy_dict
+
 
 
 if __name__ == '__main__':
-    ip_list = get_ip_list()
-    print(ip_list)
-    proxies = get_random_ip(ip_list)
-    print(proxies)
+    proxy_dict = get_random_ip()
+    print(proxy_dict)
+
+    # ip, port = ("http://110.73.2.182", "8123")
+    # proxy_url = "{0}:{1}".format(ip, port)
+    # print(proxy_url)
