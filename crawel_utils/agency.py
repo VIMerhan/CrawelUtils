@@ -26,7 +26,7 @@ def get_ip_list(url=URL, headers=HEADERS):
 
 def get_random_ip():
     ip_list = get_ip_list()
-    # 一行语句完成遍历赋值
+    # 列表生成式
     proxy_list = ['http://' + ip for ip in ip_list]
     # 随机选取ip
     proxy_ip = random.choice(proxy_list)

@@ -1,8 +1,8 @@
 import pymongo
 
 
-def get_collection(db_name, set_name):
-    connection = pymongo.MongoClient(host='127.0.0.1', port=27017)  # 连接MongDB数据库
+def get_collection(db_name, set_name, host='127.0.0.1', port=27017):
+    connection = pymongo.MongoClient(host=host, port=port)  # 连接MongDB数据库
     db = connection[db_name]
     return db[set_name]  # 返回集合
 
@@ -26,7 +26,6 @@ def set_one_doc(set, doc):
 
 if __name__ == '__main__':
     set = get_collection('数据分析', '爱情公寓')
-
     doc = get_one_doc(set)
     doc_list = get_list_doc(set)
 
