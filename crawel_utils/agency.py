@@ -1,6 +1,7 @@
 # coding=utf-8
 # IP地址取自国内髙匿代理IP网站：http://www.xicidaili.com/nn/
 # 仅仅爬取首页IP地址就足够一般使用
+import telnetlib
 
 from bs4 import BeautifulSoup
 import requests
@@ -33,12 +34,31 @@ def get_random_ip():
     proxy_dict = {'http': proxy_ip}
     return proxy_dict
 
+def test_ip():
+    ip_dict = get_random_ip()
+    # 这里假设有ip_list中某一ip
+    l= ip_dict['http']
+    http, ip_port= l.split('://')
+    ip,port=ip_port.split(':')
+    print(ip)
+    print(port)
+   
+    try:
+        telnetlib.Telnet(ip, port=port, timeout=5)
+    except:
+        print('失败')
+    else:
+        print('成功')
+        return ip_dict
+
 
 
 if __name__ == '__main__':
-    proxy_dict = get_random_ip()
-    print(proxy_dict)
-
+    # print(get_ip_list())
+    # proxy_dict = get_random_ip()
+    # print(proxy_dict)
+     ip_dict =  test_ip()
+               
     # ip, port = ("http://110.73.2.182", "8123")
     # proxy_url = "{0}:{1}".format(ip, port)
     # print(proxy_url)

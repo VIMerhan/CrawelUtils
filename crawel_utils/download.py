@@ -99,9 +99,7 @@ class Maoyan(object):
         return builtwith.parse(url)
 
     def parse_ono_page(self, html):
-        data = json.loads(html)['cmts']  # 评论以json形式存储,故以json形式截取
-        print(data)
-        print(type(data))
+        data = json.loads(html)['cmts']
         for item in data:
             # 迭代返回一个字典
             yield {
@@ -116,7 +114,7 @@ class Maoyan(object):
     def save_to_txt(self):
         for i in range(1, 1001):
             url = 'http://m.maoyan.com/mmdb/comments/movie/' + self.movie_id + '.json?_v_=yes&offset=' + str(i)
-            html = self.urllib_method(url)
+            html = self.request_method(url, proxies=self.proxies)
             print('正在保存第%d页.' % i)
             for item in self.parse_ono_page(html):
                 with open('影评数据.txt', 'a', encoding='utf-8') as f:
@@ -124,13 +122,13 @@ class Maoyan(object):
                         item['date'] + ',' + item['nickname'] + ',' + item['city'] + ',' + str(item['rate']) + ',' +
                         item['comment'] + '\n')
             # 反爬
-            time.sleep(5 + float(random.randint(1, 100)) / 20)
+            # time.sleep(5 + float(random.randint(1, 100)) / 20)
 
     # 保存数据到Mongodb
-    def save_to_mongo(self, start=0, end=0, proxies=None):
+    def save_to_mongo(self, start=0, end=0):
         for i in range(start, end):
             url = 'http://m.maoyan.com/mmdb/comments/movie/' + self.movie_id + '.json?_v_=yes&offset=' + str(i)
-            html = self.urllib_method(url, proxies=proxies)
+            html = self.urllib_method(url, proxies=self.proxies)
             print('正在保存第%d页.' % i)
             set = mongoutil.get_collection(self.db_name, self.set_name)
 
@@ -152,9 +150,9 @@ class Maoyan(object):
             x.append((i, None))
         return x
 
-    def serial_thread_download(self):
+    def serial_thread_download(self, func, *args, **kwargs):
         start_time = time.time()
-        self.save_to_mongo(500, 1001)
+        func()
         print('%d second' % (time.time() - start_time))
 
     def multi_thread_download(self, func, *args, **kwargs):
@@ -164,41 +162,28 @@ class Maoyan(object):
         pool = threadpool.ThreadPool(num_workers=self.thread_max)
 
         requests = threadpool.makeRequests(func, list_args)
-
         [pool.putRequest(req) for req in requests]
         pool.wait()
         print('%d second' % (time.time() - start_time))
 
 
+def test_yield():
+    print('ok')
+    data = [1,2,3,4,5]
+    print(data)
+    for item in data:
+        print(item)
+        x = 10
+        yield {
+            'date': item
+        }
+
 if __name__ == '__main__':
-    maoyan = Maoyan(movie_id=1175253, page_size=40, thread_max=20)
+    maoyan = Maoyan(movie_id=1175253, page_size=40, thread_max=1, proxy=None)
 
-    maoyan.multi_thread_download(func=maoyan.save_to_mongo)
+    # maoyan.multi_thread_download(func=maoyan.save_to_mongo)
+    x=[]
+    for i in range(0,5):
+        x.append(test_yield())
+        print(x)
 
-
-
-
-    # func_a(func_b, 1, 2, 3)
-    # url = 'http://m.maoyan.com/mmdb/comments/movie/1175253.json?_v_=yes&offset=' + str(1)
-    # html = urllib_method(url)
-    # set = mongoutil.get_collection('数据分析','爱情公寓')
-    #
-    # doc = parse_ono_page(html)
-
-    # set.insert(doc)
-    # # 休眠反爬
-    # time.sleep(5 + float(random.randint(1, 100)) / 20)
-
-    # url = 'http://www.baidu.com'
-    # # 代理UA
-    # user_agent = random.choice(USER_AGENT_LIST)
-    # # 代理ip
-    # proxy_dict = agency.get_random_ip()
-    # print(proxy_dict)
-    #
-    # html = request_method(url)
-    # print(html)
-
-    # request_method(url)
-
-    # save_to_txt()
